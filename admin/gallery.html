@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gallery Manager | ANIZ Admin</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="../assets/css/styles.css">
+  <link rel="stylesheet" href="assets/admin.css">
+</head>
+<body>
+
+<div class="admin-layout">
+  <aside class="admin-sidebar">
+    <a class="admin-brand" href="../index.html">
+      <img src="../assets/images/hero/001-cc1d37_7d676c262d7f4e14938c760f30336d1e-mv2.webp" alt="ANIZ logo">
+      <span>ANIZ Admin</span>
+    </a>
+    <nav class="admin-nav" aria-label="Admin navigation">
+      <a href="dashboard.html">📊 Dashboard</a>
+      <a href="banner.html">📢 Announcements</a>
+      <a href="events.html">📅 Events</a>
+      <a href="team.html">👥 Our Team</a>
+      <a href="gallery.html" class="active">🖼 Gallery</a>
+      <hr>
+      <a href="../pages/gallery.html" target="_blank">↗ View Gallery Page</a>
+      <a href="login.html" data-admin-logout>Log out</a>
+    </nav>
+  </aside>
+
+  <main class="admin-main" id="main">
+    <header class="admin-page-header">
+      <h1>Gallery</h1>
+      <p>Add new event photos, remove outdated ones, and reorder the gallery grid. Changes appear live on the public Gallery page.</p>
+    </header>
+
+    <div class="admin-actions-row">
+      <p>Photos are referenced by path or URL — the actual image files must be uploaded to the server's <code>assets/images/gallery/</code> folder separately.</p>
+      <button class="admin-btn admin-btn-secondary" id="btn-seed">↺ Load current gallery photos</button>
+      <button class="admin-btn admin-btn-secondary" id="btn-export">⬇ Export JSON</button>
+    </div>
+
+    <!-- Add photo form -->
+    <div class="admin-form-panel" style="margin-bottom:24px">
+      <h3>Add Photo</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end">
+        <label style="margin:0">
+          Image Path or URL *
+          <input type="text" id="f-src" placeholder="assets/images/gallery/yourfile.webp">
+        </label>
+        <label style="margin:0">
+          Alt Text (describe the photo)
+          <input type="text" id="f-alt" placeholder="ANIZ community event photo">
+        </label>
+        <button class="admin-btn admin-btn-primary" id="btn-add" style="height:42px;align-self:end">Add photo</button>
+      </div>
+      <div class="admin-status" id="form-status"></div>
+    </div>
+
+    <!-- Gallery preview grid -->
+    <div>
+      <h3 style="margin:0 0 6px;font-size:1rem;color:#0f5132">Gallery Photos (<span id="count">0</span>)</h3>
+      <p style="color:#5c6961;font-size:.85rem;margin:0 0 12px">Hover over a photo and click ✕ to remove it. Use the list below to reorder.</p>
+      <div class="admin-gallery-grid" id="gallery-grid"></div>
+    </div>
+
+    <!-- Reorder list -->
+    <div style="margin-top:24px">
+      <h3 style="font-size:1rem;color:#0f5132;margin:0 0 10px">Reorder / Remove</h3>
+      <div class="admin-list" id="gallery-list"></div>
+    </div>
+  </main>
+</div>
+
+<script>
+const KEY = 'aniz:gallery';
+
+// All 51 downloaded gallery images as defaults
+const DEFAULT_GALLERY = [
+  'assets/images/gallery/500-cc1d37_1143d626dfd64f11bad9d337ef9b1de5-mv2.webp',
+  'assets/images/gallery/501-cc1d37_1143d626dfd64f11bad9d337ef9b1de5-mv2.webp',
+  'assets/images/gallery/502-cc1d37_1143d626dfd64f11bad9d337ef9b1de5-mv2.webp',
+  'assets/images/gallery/503-cc1d37_1143d626dfd64f11bad9d337ef9b1de5-mv2.webp',
+  'assets/images/gallery/504-cc1d37_1143d626dfd64f11bad9d337ef9b1de5-mv2.webp',
+  'assets/images/gallery/505-cc1d37_9eb9c0623840448ab2dce341fa090888-mv2.webp',
+  'assets/images/gallery/506-cc1d37_9eb9c0623840448ab2dce341fa090888-mv2.webp',
+  'assets/images/gallery/507-cc1d37_9eb9c0623840448ab2dce341fa090888-mv2.webp',
+  'assets/images/gallery/508-cc1d37_9eb9c0623840448ab2dce341fa090888-mv2.webp',
+  'assets/images/gallery/509-cc1d37_9eb9c0623840448ab2dce341fa090888-mv2.webp',
+  'assets/images/gallery/510-cc1d37_a97066cc28014d3c89073b2f4f3b775f-mv2.webp',
+  'assets/images/gallery/511-cc1d37_a97066cc28014d3c89073b2f4f3b775f-mv2.webp',
+  'assets/images/gallery/512-cc1d37_a97066cc28014d3c89073b2f4f3b775f-mv2.webp',
+  'assets/images/gallery/513-cc1d37_a97066cc28014d3c89073b2f4f3b775f-mv2.webp',
+  'assets/images/gallery/514-cc1d37_a97066cc28014d3c89073b2f4f3b775f-mv2.webp',
+  'assets/images/gallery/515-cc1d37_dad0f294714c439ba419588353179c97-mv2.webp',
+  'assets/images/gallery/516-cc1d37_dad0f294714c439ba419588353179c97-mv2.webp',
+  'assets/images/gallery/517-cc1d37_dad0f294714c439ba419588353179c97-mv2.webp',
+  'assets/images/gallery/518-cc1d37_dad0f294714c439ba419588353179c97-mv2.webp',
+  'assets/images/gallery/519-cc1d37_fbd8ae29c75a484fae50e15c56334a02-mv2.webp',
+  'assets/images/gallery/520-cc1d37_fbd8ae29c75a484fae50e15c56334a02-mv2.webp',
+  'assets/images/gallery/521-cc1d37_fbd8ae29c75a484fae50e15c56334a02-mv2.webp',
+  'assets/images/gallery/522-cc1d37_fbd8ae29c75a484fae50e15c56334a02-mv2.webp',
+  'assets/images/gallery/523-cc1d37_fbd8ae29c75a484fae50e15c56334a02-mv2.webp',
+  'assets/images/gallery/524-cc1d37_b986f805ad51404e88bd58b53a1a5261-mv2.webp',
+  'assets/images/gallery/525-cc1d37_b986f805ad51404e88bd58b53a1a5261-mv2.webp',
+  'assets/images/gallery/526-cc1d37_b986f805ad51404e88bd58b53a1a5261-mv2.webp',
+  'assets/images/gallery/527-cc1d37_b986f805ad51404e88bd58b53a1a5261-mv2.webp',
+  'assets/images/gallery/528-cc1d37_b986f805ad51404e88bd58b53a1a5261-mv2.webp',
+  'assets/images/gallery/529-cc1d37_34677222e7be4d749b5b46008142e779-mv2.webp',
+  'assets/images/gallery/530-cc1d37_34677222e7be4d749b5b46008142e779-mv2.webp',
+  'assets/images/gallery/531-cc1d37_34677222e7be4d749b5b46008142e779-mv2.webp',
+  'assets/images/gallery/532-cc1d37_34677222e7be4d749b5b46008142e779-mv2.webp',
+  'assets/images/gallery/533-cc1d37_34677222e7be4d749b5b46008142e779-mv2.webp',
+  'assets/images/gallery/534-cc1d37_b0d45d51120445efb79bf8643f545cec-mv2.webp',
+  'assets/images/gallery/535-cc1d37_b0d45d51120445efb79bf8643f545cec-mv2.webp',
+  'assets/images/gallery/536-cc1d37_7dbe1819f64d4053988709f05ad7055b-mv2.webp',
+  'assets/images/gallery/537-cc1d37_7dbe1819f64d4053988709f05ad7055b-mv2.webp',
+  'assets/images/gallery/538-cc1d37_7dbe1819f64d4053988709f05ad7055b-mv2.webp',
+  'assets/images/gallery/539-cc1d37_7dbe1819f64d4053988709f05ad7055b-mv2.webp',
+  'assets/images/gallery/540-cc1d37_7dbe1819f64d4053988709f05ad7055b-mv2.webp',
+  'assets/images/gallery/541-cc1d37_cc0a0af478ab46079df64773e62ab3fa-mv2.webp',
+  'assets/images/gallery/542-cc1d37_cc0a0af478ab46079df64773e62ab3fa-mv2.webp',
+  'assets/images/gallery/543-cc1d37_cc0a0af478ab46079df64773e62ab3fa-mv2.webp',
+  'assets/images/gallery/544-cc1d37_cc0a0af478ab46079df64773e62ab3fa-mv2.webp',
+  'assets/images/gallery/545-cc1d37_cc0a0af478ab46079df64773e62ab3fa-mv2.webp',
+  'assets/images/gallery/546-cc1d37_04ce86bc6e674430aec5da543125245e-mv2.webp',
+  'assets/images/gallery/547-cc1d37_04ce86bc6e674430aec5da543125245e-mv2.webp',
+  'assets/images/gallery/548-cc1d37_04ce86bc6e674430aec5da543125245e-mv2.webp',
+  'assets/images/gallery/549-cc1d37_04ce86bc6e674430aec5da543125245e-mv2.webp',
+  'assets/images/gallery/550-cc1d37_04ce86bc6e674430aec5da543125245e-mv2.webp',
+].map((src, i) => ({ src, alt: 'ANIZ community photo ' + (i + 1) }));
+
+function load() { return JSON.parse(localStorage.getItem(KEY) || 'null') || []; }
+function save(data) { localStorage.setItem(KEY, JSON.stringify(data)); render(); }
+
+function remove(i) {
+  const data = load(); data.splice(i, 1); save(data);
+}
+function move(i, dir) {
+  const data = load(); const j = i + dir;
+  if (j < 0 || j >= data.length) return;
+  [data[i], data[j]] = [data[j], data[i]]; save(data);
+}
+
+function render() {
+  const data = load();
+  document.getElementById('count').textContent = data.length;
+
+  // Visual grid
+  const grid = document.getElementById('gallery-grid');
+  grid.innerHTML = data.map((img, i) => `
+    <div class="admin-gallery-item">
+      <img src="../${img.src}" alt="${img.alt}" loading="lazy" onerror="this.parentElement.style.background='#ddd'">
+      <button class="remove-btn" onclick="remove(${i})" aria-label="Remove photo">✕</button>
+    </div>
+  `).join('');
+
+  // Text list for reordering
+  const list = document.getElementById('gallery-list');
+  if (data.length === 0) {
+    list.innerHTML = '<p style="color:#5c6961;font-size:.9rem">No photos. Click "Load current gallery photos" or add a new photo above.</p>';
+    return;
+  }
+  list.innerHTML = data.map((img, i) => `
+    <div class="admin-list-item">
+      <div class="admin-item-info">
+        <p class="admin-item-title" style="font-size:.85rem">${img.src.split('/').pop()}</p>
+        <p class="admin-item-sub">${img.alt}</p>
+      </div>
+      <div class="admin-item-actions">
+        ${i > 0 ? `<button class="admin-btn admin-btn-secondary admin-btn-sm" onclick="move(${i},-1)">↑</button>` : ''}
+        ${i < data.length-1 ? `<button class="admin-btn admin-btn-secondary admin-btn-sm" onclick="move(${i},1)">↓</button>` : ''}
+        <button class="admin-btn admin-btn-danger admin-btn-sm" onclick="remove(${i})">Remove</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function showStatus(msg, type) {
+  const el = document.getElementById('form-status');
+  el.textContent = msg; el.className = 'admin-status ' + type;
+  setTimeout(() => el.className = 'admin-status', 3000);
+}
+
+document.getElementById('btn-add').addEventListener('click', () => {
+  const src = document.getElementById('f-src').value.trim();
+  const alt = document.getElementById('f-alt').value.trim();
+  if (!src) { showStatus('Image path or URL is required.', 'error'); return; }
+  const data = load();
+  data.push({ src, alt: alt || 'ANIZ community photo' });
+  save(data);
+  document.getElementById('f-src').value = '';
+  document.getElementById('f-alt').value = '';
+  showStatus('Photo added.', 'success');
+});
+
+document.getElementById('btn-seed').addEventListener('click', () => {
+  if (load().length > 0 && !confirm('Replace current gallery with the 51 default photos?')) return;
+  save(DEFAULT_GALLERY); showStatus('Loaded default gallery photos.', 'success');
+});
+document.getElementById('btn-export').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(load(), null, 2)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'aniz-gallery.json'; a.click();
+});
+
+render();
+</script>
+</body>
+</html>
