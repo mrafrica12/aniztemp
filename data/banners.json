@@ -1,0 +1,23 @@
+[
+  {
+    "text": "Dr. Hardik Pipalia receives the APHA Outstanding Practice in Public Health Ethics Award.",
+    "linkText": "Read more",
+    "linkHref": "https://www.aniz.org/",
+    "active": true,
+    "priority": 1
+  },
+  {
+    "text": "AIDS Walk Atlanta 5K & Music Festival supports ANIZ and local HIV/AIDS services.",
+    "linkText": "Support ANIZ",
+    "linkHref": "https://www.aniz.org/aidswalk2025",
+    "active": true,
+    "priority": 2
+  },
+  {
+    "text": "Free, confidential HIV/STI and Hepatitis C testing is available at ANIZ.",
+    "linkText": "Request testing",
+    "linkHref": "pages/hiv-testing.html",
+    "active": true,
+    "priority": 3
+  }
+]
