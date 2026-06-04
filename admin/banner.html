@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Announcements Manager | ANIZ Admin</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="../assets/css/styles.css">
+  <link rel="stylesheet" href="assets/admin.css">
+</head>
+<body>
+
+<div class="admin-layout">
+  <aside class="admin-sidebar">
+    <a class="admin-brand" href="../index.html">
+      <img src="../assets/images/hero/001-cc1d37_7d676c262d7f4e14938c760f30336d1e-mv2.webp" alt="ANIZ logo">
+      <span>ANIZ Admin</span>
+    </a>
+    <nav class="admin-nav" aria-label="Admin navigation">
+      <a href="dashboard.html">📊 Dashboard</a>
+      <a href="banner.html" class="active">📢 Announcements</a>
+      <a href="events.html">📅 Events</a>
+      <a href="team.html">👥 Our Team</a>
+      <a href="gallery.html">🖼 Gallery</a>
+      <hr>
+      <a href="../index.html" target="_blank">↗ View Site</a>
+      <a href="login.html" data-admin-logout>Log out</a>
+    </nav>
+  </aside>
+
+  <main class="admin-main" id="main">
+    <header class="admin-page-header">
+      <h1>Announcement Banner</h1>
+      <p>Manage the rotating announcements that appear at the top of every page. Only active announcements rotate. The banner cycles every 6 seconds.</p>
+    </header>
+
+    <!-- Live preview -->
+    <div style="margin-bottom:24px">
+      <h2 style="font-size:1rem;color:#0f5132;margin:0 0 8px">Live Preview</h2>
+      <div id="banner-preview" style="background:#0f5132;color:#fff;text-align:center;padding:10px 48px;border-radius:8px;font-size:.9rem;min-height:38px;position:relative">
+        <span id="preview-msg">Loading...</span>
+        <a id="preview-link" href="#" style="color:#fff;text-decoration:underline;font-weight:700;margin-left:4px;display:none"></a>
+      </div>
+    </div>
+
+    <div class="admin-actions-row">
+      <p>Changes save immediately. Visitors will see the new announcements the next time they load a page.</p>
+      <button class="admin-btn admin-btn-secondary" id="btn-seed">↺ Reset to defaults</button>
+      <button class="admin-btn admin-btn-secondary" id="btn-export">⬇ Export JSON</button>
+    </div>
+
+    <div class="cms-split">
+      <!-- Add/Edit form -->
+      <div class="admin-form-panel">
+        <h3 id="form-title">Add Announcement</h3>
+        <input type="hidden" id="edit-index" value="">
+
+        <label>
+          Announcement Text *
+          <textarea id="f-text" rows="3" placeholder="e.g. 🏆 Dr. Hardik Pipalia receives the APHA Outstanding Practice in Public Health Ethics Award."></textarea>
+          <small style="color:#5c6961;font-weight:400">Keep it brief — 1–2 sentences. Emoji at the start helps grab attention.</small>
+        </label>
+
+        <label>
+          Link Text (optional)
+          <input type="text" id="f-link-text" placeholder="e.g. Learn more">
+        </label>
+        <label>
+          Link URL (optional)
+          <input type="url" id="f-link-href" placeholder="https://...">
+        </label>
+
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <label class="toggle" title="Active — shows in rotation">
+            <input type="checkbox" id="f-active" checked>
+            <span class="toggle-slider"></span>
+          </label>
+          <span style="font-size:.9rem;font-weight:600">Active (show in rotation)</span>
+        </div>
+
+        <div style="display:flex;gap:8px">
+          <button class="admin-btn admin-btn-primary" id="btn-save">Save announcement</button>
+          <button class="admin-btn admin-btn-secondary" id="btn-cancel" style="display:none">Cancel</button>
+        </div>
+        <div class="admin-status" id="form-status"></div>
+      </div>
+
+      <!-- Current announcements -->
+      <div>
+        <h3 style="margin:0 0 12px;font-size:1rem;color:#0f5132">
+          Announcements (<span id="active-count">0</span> active of <span id="total-count">0</span>)
+        </h3>
+        <p style="color:#5c6961;font-size:.85rem;margin:0 0 12px">Use ↑↓ to set the rotation order. Toggle the switch to show or hide each announcement without deleting it.</p>
+        <div class="admin-list" id="banner-list">
+          <p style="color:#5c6961;font-size:.9rem">No announcements. Add one or click "Reset to defaults".</p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+const KEY = 'aniz:banners';
+
+const DEFAULT_BANNERS = [
+  { text: '🏆 Dr. Hardik Pipalia receives the APHA Outstanding Practice in Public Health Ethics Award.', linkText: null, linkHref: null, active: true },
+  { text: 'AIDS Walk Atlanta 5K & Music Festival — support ANIZ and local HIV/AIDS services.', linkText: 'Learn more', linkHref: 'https://www.aniz.org/aidswalk2025', active: true },
+];
+
+function load() { return JSON.parse(localStorage.getItem(KEY) || 'null') || []; }
+function save(data) { localStorage.setItem(KEY, JSON.stringify(data)); render(); }
+
+let previewIdx = 0;
+let previewTimer = null;
+
+function updatePreview(data) {
+  const active = data.filter(b => b.active);
+  if (active.length === 0) {
+    document.getElementById('preview-msg').textContent = 'No active announcements.';
+    document.getElementById('preview-link').style.display = 'none';
+    return;
+  }
+  clearInterval(previewTimer);
+  const show = (i) => {
+    previewIdx = i;
+    const b = active[i];
+    document.getElementById('preview-msg').textContent = b.text + ' ';
+    const lnk = document.getElementById('preview-link');
+    if (b.linkText && b.linkHref) { lnk.textContent = b.linkText; lnk.href = b.linkHref; lnk.style.display = ''; }
+    else lnk.style.display = 'none';
+  };
+  show(0);
+  if (active.length > 1) {
+    previewTimer = setInterval(() => show((previewIdx + 1) % active.length), 2500);
+  }
+}
+
+function render() {
+  const data = load();
+  const active = data.filter(b => b.active);
+  document.getElementById('active-count').textContent = active.length;
+  document.getElementById('total-count').textContent = data.length;
+  updatePreview(data);
+
+  const list = document.getElementById('banner-list');
+  if (data.length === 0) {
+    list.innerHTML = '<p style="color:#5c6961;font-size:.9rem">No announcements yet.</p>';
+    return;
+  }
+
+  list.innerHTML = data.map((b, i) => `
+    <div class="admin-list-item${b.active ? '' : ' inactive'}">
+      <div style="display:flex;align-items:flex-start;gap:10px;flex:1;min-width:0">
+        <label class="toggle" title="${b.active ? 'Active' : 'Inactive'}" style="margin-top:2px;flex-shrink:0">
+          <input type="checkbox" ${b.active ? 'checked' : ''} onchange="toggleActive(${i}, this.checked)">
+          <span class="toggle-slider"></span>
+        </label>
+        <div class="admin-item-info" style="min-width:0">
+          <p class="admin-item-title" style="font-size:.88rem;white-space:normal">${b.text}</p>
+          ${b.linkText ? `<p class="admin-item-sub">Link: "${b.linkText}"</p>` : ''}
+        </div>
+      </div>
+      <div class="admin-item-actions" style="flex-shrink:0">
+        ${i > 0 ? `<button class="admin-btn admin-btn-secondary admin-btn-sm" onclick="move(${i},-1)">↑</button>` : ''}
+        ${i < data.length-1 ? `<button class="admin-btn admin-btn-secondary admin-btn-sm" onclick="move(${i},1)">↓</button>` : ''}
+        <button class="admin-btn admin-btn-secondary admin-btn-sm" onclick="startEdit(${i})">Edit</button>
+        <button class="admin-btn admin-btn-danger admin-btn-sm" onclick="remove(${i})">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleActive(i, val) {
+  const data = load(); data[i].active = val; save(data);
+}
+function move(i, dir) {
+  const data = load(); const j = i + dir;
+  if (j < 0 || j >= data.length) return;
+  [data[i], data[j]] = [data[j], data[i]]; save(data);
+}
+function remove(i) {
+  if (!confirm('Delete this announcement?')) return;
+  const data = load(); data.splice(i, 1); save(data);
+}
+
+function startEdit(i) {
+  const b = load()[i];
+  document.getElementById('form-title').textContent = 'Edit Announcement';
+  document.getElementById('edit-index').value = i;
+  document.getElementById('f-text').value = b.text;
+  document.getElementById('f-link-text').value = b.linkText || '';
+  document.getElementById('f-link-href').value = b.linkHref || '';
+  document.getElementById('f-active').checked = b.active;
+  document.getElementById('btn-cancel').style.display = '';
+  document.getElementById('f-text').focus();
+}
+
+function cancelEdit() {
+  document.getElementById('form-title').textContent = 'Add Announcement';
+  document.getElementById('edit-index').value = '';
+  document.getElementById('f-text').value = '';
+  document.getElementById('f-link-text').value = '';
+  document.getElementById('f-link-href').value = '';
+  document.getElementById('f-active').checked = true;
+  document.getElementById('btn-cancel').style.display = 'none';
+}
+
+function showStatus(msg, type) {
+  const el = document.getElementById('form-status');
+  el.textContent = msg; el.className = 'admin-status ' + type;
+  setTimeout(() => el.className = 'admin-status', 3000);
+}
+
+document.getElementById('btn-save').addEventListener('click', () => {
+  const text = document.getElementById('f-text').value.trim();
+  if (!text) { showStatus('Announcement text is required.', 'error'); return; }
+
+  const entry = {
+    text,
+    linkText: document.getElementById('f-link-text').value.trim() || null,
+    linkHref: document.getElementById('f-link-href').value.trim() || null,
+    active: document.getElementById('f-active').checked,
+  };
+
+  const data = load();
+  const idx = document.getElementById('edit-index').value;
+  if (idx !== '') { data[parseInt(idx)] = entry; showStatus('Announcement updated.', 'success'); }
+  else { data.push(entry); showStatus('Announcement added.', 'success'); }
+  save(data); cancelEdit();
+});
+
+document.getElementById('btn-cancel').addEventListener('click', cancelEdit);
+document.getElementById('btn-seed').addEventListener('click', () => {
+  if (load().length > 0 && !confirm('Reset to default announcements?')) return;
+  save(DEFAULT_BANNERS); showStatus('Reset to defaults.', 'success');
+});
+document.getElementById('btn-export').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(load(), null, 2)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'aniz-banners.json'; a.click();
+});
+
+render();
+</script>
+</body>
+</html>
