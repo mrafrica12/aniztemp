@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Popup Manager | ANIZ Admin</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="../assets/css/styles.css?v=navfix-20260604">
+  <link rel="stylesheet" href="assets/admin.css">
+  <script defer src="../assets/js/site.js?v=navfix-20260604"></script>
+</head>
+<body>
+
+<div class="admin-layout">
+  <aside class="admin-sidebar">
+    <a class="admin-brand" href="../index.html">
+      <img src="../assets/images/hero/001-cc1d37_7d676c262d7f4e14938c760f30336d1e-mv2.webp" alt="ANIZ logo">
+      <span>ANIZ Admin</span>
+    </a>
+    <nav class="admin-nav" aria-label="Admin navigation">
+      <a href="dashboard.html">📊 Dashboard</a>
+      <a href="banner.html">📢 Announcements</a>
+      <a href="events.html">📅 Events</a>
+      <a href="team.html">👥 Our Team</a>
+      <a href="gallery.html">🖼 Gallery</a>
+      <a href="popup.html" class="active">🎉 Popup</a>
+      <hr>
+      <a href="../index.html" target="_blank">↗ View Site</a>
+      <a href="login.html" data-admin-logout>Log out</a>
+    </nav>
+  </aside>
+
+  <main class="admin-main" id="main">
+    <header class="admin-page-header">
+      <h1>Popup Manager</h1>
+      <p>Control the announcement popup that appears on the homepage. Changes take effect immediately when visitors load the site.</p>
+    </header>
+
+    <!-- Status toggle -->
+    <section class="admin-section">
+      <h2>Status</h2>
+      <div class="admin-form-panel" style="display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap">
+        <div>
+          <strong style="font-size:1rem">Show popup on homepage</strong>
+          <p style="margin:4px 0 0;font-size:.88rem;color:#5c6961">When off, the popup is hidden from all visitors.</p>
+        </div>
+        <div class="toggle-wrap">
+          <label class="toggle">
+            <input type="checkbox" id="f-enabled" checked>
+            <span class="toggle-slider"></span>
+          </label>
+          <span id="status-label" style="font-weight:700;color:#0f5132;font-size:.9rem">ON</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="cms-split">
+
+      <!-- Left: all the form fields -->
+      <div style="display:grid;gap:20px">
+
+        <div class="admin-form-panel">
+          <h3>Content</h3>
+          <label>Headline
+            <textarea id="f-headline" rows="2">We are official beneficiaries of the 2026 Atlanta AIDS Walk!</textarea>
+          </label>
+          <label>Body Text
+            <textarea id="f-body" rows="2">Click to learn how you can join in making a difference!</textarea>
+          </label>
+          <label>Button Label
+            <input type="text" id="f-btnLabel" value="Learn More &amp; Get Involved">
+          </label>
+          <label>Button Link URL
+            <input type="url" id="f-btnUrl" value="pages/donate.html">
+          </label>
+          <label>Auto-dismiss after (seconds)
+            <input type="number" id="f-duration" value="5" min="1" max="60" style="max-width:100px">
+          </label>
+        </div>
+
+        <div class="admin-form-panel">
+          <h3>Image</h3>
+          <label>Image URL
+            <input type="url" id="f-imgUrl" value="assets/images/programs/642-group1.webp" placeholder="https:// or relative path">
+          </label>
+          <label style="margin-top:4px">Upload Image <span style="font-weight:400;color:#5c6961">(replaces URL above)</span>
+            <input type="file" id="f-imgUpload" accept="image/*">
+          </label>
+          <label>Image Position
+            <select id="f-imgPos">
+              <option value="left">Left</option>
+              <option value="right">Right</option>
+              <option value="top">Top</option>
+              <option value="none">No Image</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="admin-form-panel">
+          <h3>Colors</h3>
+          <label>Headline Color
+            <div style="display:flex;gap:10px;align-items:center">
+              <input type="color" id="f-headlineColor-picker" value="#cc0000" style="width:44px;height:36px;border:1px solid #b7c4bb;border-radius:6px;padding:2px;cursor:pointer;background:#fff;flex-shrink:0">
+              <input type="text" id="f-headlineColor" value="#cc0000" style="flex:1">
+            </div>
+          </label>
+          <label>Button Color
+            <div style="display:flex;gap:10px;align-items:center">
+              <input type="color" id="f-btnColor-picker" value="#cc0000" style="width:44px;height:36px;border:1px solid #b7c4bb;border-radius:6px;padding:2px;cursor:pointer;background:#fff;flex-shrink:0">
+              <input type="text" id="f-btnColor" value="#cc0000" style="flex:1">
+            </div>
+          </label>
+          <label>Overlay Background
+            <div style="display:flex;gap:10px;align-items:center">
+              <input type="color" id="f-bgColor-picker" value="#000000" style="width:44px;height:36px;border:1px solid #b7c4bb;border-radius:6px;padding:2px;cursor:pointer;background:#fff;flex-shrink:0">
+              <input type="text" id="f-bgColor" value="rgba(0,0,0,0.55)" style="flex:1">
+            </div>
+          </label>
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="admin-btn admin-btn-primary" id="btn-save" style="flex:1;justify-content:center;padding:13px">💾 Save &amp; Go Live</button>
+          <button class="admin-btn admin-btn-secondary" id="btn-reset" style="padding:13px 18px">Reset Defaults</button>
+        </div>
+        <div id="save-status" class="admin-status"></div>
+
+      </div>
+
+      <!-- Right: live preview -->
+      <div style="position:sticky;top:20px">
+        <div class="admin-form-panel">
+          <h3>Live Preview</h3>
+          <p style="font-size:.82rem;color:#5c6961;margin:-8px 0 14px">Updates as you type. Hit Save to push live.</p>
+
+          <!-- Mini popup preview -->
+          <div id="preview-box" style="border-radius:10px;overflow:hidden;box-shadow:0 4px 18px rgba(0,0,0,.13);display:flex;flex-direction:row;border:1px solid #dde5df">
+            <div id="preview-img" style="flex:0 0 38%;min-height:160px;background:#0f5132 center/cover no-repeat;background-image:url('../assets/images/programs/642-group1.webp')"></div>
+            <div style="flex:1;padding:18px 14px 14px;display:flex;flex-direction:column;gap:6px;background:#fff">
+              <div id="preview-headline" style="font-size:.9rem;font-weight:800;line-height:1.25;color:#cc0000">We are official beneficiaries of the 2026 Atlanta AIDS Walk!</div>
+              <div id="preview-body" style="font-size:.78rem;font-weight:600;color:#222;line-height:1.4">Click to learn how you can join in making a difference!</div>
+              <div id="preview-btn" style="display:inline-block;margin-top:6px;padding:6px 12px;background:#cc0000;color:#fff;border-radius:5px;font-size:.75rem;font-weight:700;align-self:flex-start">Learn More &amp; Get Involved</div>
+            </div>
+          </div>
+
+          <div id="preview-status" style="margin-top:12px;display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:.78rem;font-weight:700;background:#dcfce7;color:#166534">
+            <span style="width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block"></span>
+            Popup is ON
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+const STORAGE_KEY = 'aniz-popup-config';
+
+const DEFAULTS = {
+  enabled:       true,
+  headline:      'We are official beneficiaries of the 2026 Atlanta AIDS Walk!',
+  body:          'Click to learn how you can join in making a difference!',
+  btnLabel:      'Learn More & Get Involved',
+  btnUrl:        'pages/donate.html',
+  imgUrl:        'assets/images/programs/642-group1.webp',
+  imgPos:        'left',
+  headlineColor: '#cc0000',
+  btnColor:      '#cc0000',
+  bgColor:       'rgba(0,0,0,0.55)',
+  duration:      5
+};
+
+const fields = {
+  enabled:       document.getElementById('f-enabled'),
+  headline:      document.getElementById('f-headline'),
+  body:          document.getElementById('f-body'),
+  btnLabel:      document.getElementById('f-btnLabel'),
+  btnUrl:        document.getElementById('f-btnUrl'),
+  imgUrl:        document.getElementById('f-imgUrl'),
+  imgPos:        document.getElementById('f-imgPos'),
+  headlineColor: document.getElementById('f-headlineColor'),
+  btnColor:      document.getElementById('f-btnColor'),
+  bgColor:       document.getElementById('f-bgColor'),
+  duration:      document.getElementById('f-duration'),
+};
+
+// ── Load ──
+function load() {
+  try {
+    const c = Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'));
+    fields.enabled.checked     = c.enabled;
+    fields.headline.value      = c.headline;
+    fields.body.value          = c.body;
+    fields.btnLabel.value      = c.btnLabel;
+    fields.btnUrl.value        = c.btnUrl;
+    fields.imgUrl.value        = c.imgUrl;
+    fields.imgPos.value        = c.imgPos;
+    fields.headlineColor.value = c.headlineColor;
+    fields.btnColor.value      = c.btnColor;
+    fields.bgColor.value       = c.bgColor;
+    fields.duration.value      = c.duration;
+    tryPicker('f-headlineColor-picker', c.headlineColor);
+    tryPicker('f-btnColor-picker',      c.btnColor);
+  } catch(e) {}
+}
+
+function tryPicker(id, v) {
+  try { document.getElementById(id).value = v.startsWith('rgba') ? '#000000' : v; } catch(e){}
+}
+
+function getValues() {
+  return {
+    enabled:       fields.enabled.checked,
+    headline:      fields.headline.value,
+    body:          fields.body.value,
+    btnLabel:      fields.btnLabel.value,
+    btnUrl:        fields.btnUrl.value,
+    imgUrl:        fields.imgUrl.value,
+    imgPos:        fields.imgPos.value,
+    headlineColor: fields.headlineColor.value,
+    btnColor:      fields.btnColor.value,
+    bgColor:       fields.bgColor.value,
+    duration:      parseInt(fields.duration.value) || 5
+  };
+}
+
+// ── Preview ──
+function updatePreview() {
+  const v = getValues();
+  const box = document.getElementById('preview-box');
+  const img = document.getElementById('preview-img');
+
+  document.getElementById('preview-headline').textContent = v.headline;
+  document.getElementById('preview-headline').style.color = v.headlineColor;
+  document.getElementById('preview-body').textContent     = v.body;
+  document.getElementById('preview-btn').textContent      = v.btnLabel;
+  document.getElementById('preview-btn').style.background = v.btnColor;
+
+  if (v.imgPos === 'none') {
+    img.style.display = 'none';
+  } else {
+    img.style.display = '';
+    img.style.backgroundImage = v.imgUrl ? "url('" + v.imgUrl + "')" : '';
+    box.style.flexDirection = v.imgPos === 'right' ? 'row-reverse'
+                            : v.imgPos === 'top'   ? 'column' : 'row';
+    if (v.imgPos === 'top') {
+      img.style.cssText = 'display:block;flex:none;width:100%;min-height:100px;background-size:cover;background-position:center;background-image:' + img.style.backgroundImage;
+    } else {
+      img.style.cssText = 'display:block;flex:0 0 38%;min-height:160px;background-size:cover;background-position:center;background-image:' + img.style.backgroundImage;
+    }
+  }
+
+  // Status indicator
+  const pill = document.getElementById('preview-status');
+  const statusLabel = document.getElementById('status-label');
+  if (v.enabled) {
+    pill.style.background = '#dcfce7'; pill.style.color = '#166534';
+    pill.querySelector('span').style.background = '#166534';
+    pill.childNodes[1].textContent = ' Popup is ON';
+    statusLabel.textContent = 'ON'; statusLabel.style.color = '#0f5132';
+  } else {
+    pill.style.background = '#fee2e2'; pill.style.color = '#991b1b';
+    pill.querySelector('span').style.background = '#991b1b';
+    pill.childNodes[1].textContent = ' Popup is OFF';
+    statusLabel.textContent = 'OFF'; statusLabel.style.color = '#991b1b';
+  }
+}
+
+// ── Color picker sync ──
+['headlineColor','btnColor','bgColor'].forEach(key => {
+  const picker = document.getElementById('f-' + key + '-picker');
+  const text   = document.getElementById('f-' + key);
+  if (picker) picker.addEventListener('input', e => { text.value = e.target.value; updatePreview(); });
+  if (text)   text.addEventListener('input', e => { tryPicker('f-' + key + '-picker', e.target.value); updatePreview(); });
+});
+
+// ── Image upload ──
+document.getElementById('f-imgUpload').addEventListener('change', function() {
+  const file = this.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => { fields.imgUrl.value = e.target.result; updatePreview(); };
+  reader.readAsDataURL(file);
+});
+
+// ── Save ──
+document.getElementById('btn-save').addEventListener('click', () => {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(getValues()));
+  const s = document.getElementById('save-status');
+  s.textContent = '✓ Saved — popup updated. Refresh the homepage to see changes.';
+  s.className = 'admin-status success';
+  setTimeout(() => s.className = 'admin-status', 4000);
+});
+
+// ── Reset ──
+document.getElementById('btn-reset').addEventListener('click', () => {
+  if (!confirm('Reset all popup settings to defaults?')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  load();
+  updatePreview();
+  const s = document.getElementById('save-status');
+  s.textContent = 'Reset to defaults. Click Save to apply.';
+  s.className = 'admin-status success';
+  setTimeout(() => s.className = 'admin-status', 3000);
+});
+
+// ── Live update on all inputs ──
+Object.values(fields).forEach(el => {
+  if (el) el.addEventListener('input',  updatePreview);
+  if (el) el.addEventListener('change', updatePreview);
+});
+
+load();
+updatePreview();
+</script>
+</body>
+</html>
